@@ -5,11 +5,18 @@ import scrapy
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.selector import Selector
+from scrapy import log
 
 from items import CnbetaItem
 
 
 class CnbetaSpider(CrawlSpider):
+    def __init__(self, *a, **kw):
+
+
+        super(CnbetaSpider, self).__init__(*a, **kw)
+
+
     name = "cnbeta"
     allowed_domains = ["cnbeta.com"]
     start_urls = (
@@ -32,11 +39,11 @@ class CnbetaSpider(CrawlSpider):
     #                            callback=self.logged_in)]
 
     def save_html(self, response):
-        self.log('[start] save_html:' + response.url)
+        self.log('[start] save_html:' + response.url, level=log.DEBUG)
 
         filename = 'html/' + md5(response.url).hexdigest() + '.html'
         open(filename, 'wb').write(response.body)
-        self.log('[finish] save_html:' + response.url)
+        self.log('[finish] save_html:' + response.url, level=log.DEBUG)
 
 
     def parse(self, response):
@@ -59,11 +66,11 @@ class CnbetaSpider(CrawlSpider):
                 if next_url != '':
 
                     if next_url.startswith('http://m.cnbeta.com/view_'):
-                        self.log('start parse articles :' + next_url)
+                        self.log('start parse articles :' + next_url, level=log.INFO)
                         yield scrapy.Request(url=next_url, callback=self.parse_articles)
 
                     elif next_url.startswith('http://m.cnbeta.com/list_latest_'):
-                        self.log('start parse list :' + next_url)
+                        self.log('start parse list :' + next_url, level=log.INFO)
                         yield scrapy.Request(url=next_url, callback=self.parse)
 
                     else:
@@ -77,8 +84,6 @@ class CnbetaSpider(CrawlSpider):
 
     def parse_articles(self, response):
         self.save_html(response)
-
-        self.log('[start] process articles :' + response.url)
 
         item = CnbetaItem()
         sel = Selector(response)
@@ -94,7 +99,7 @@ class CnbetaSpider(CrawlSpider):
 
 
     def add_cookie(self, request):
-        self.log("add_cookie now")
+        self.log("add_cookie now", level=log.INFO)
         request.replace(cookies=[
             {'name': 'COOKIE_NAME', 'value': 'VALUE', 'domain': 'DOMAIN', 'path': '/'},
         ])
