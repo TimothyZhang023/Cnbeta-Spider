@@ -14,7 +14,7 @@ SPIDER_MODULES = ['posts.spiders']
 NEWSPIDER_MODULE = 'posts.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'posts (+http://www.yourdomain.com)'
+# USER_AGENT = 'posts (+http://www.yourdomain.com)'
 
 # DOWNLOAD_DELAY = 2
 # RANDOMIZE_DOWNLOAD_DELAY = True
@@ -24,7 +24,7 @@ USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/536.5 (
 COOKIES_ENABLED = True
 
 ITEM_PIPELINES = {
-    # 'posts.pipelines.PostsPipeline': 300,
+    'posts.pipelines.PostsPipeline': 300,
     'posts.pipelines.SQLStorePipeline': 800,
 }
 

@@ -10,19 +10,21 @@ from hashlib import md5
 from scrapy import log
 from twisted.enterprise import adbapi
 import MySQLdb.cursors
+from utils.compress_hash import compress_hash
 
 
 class PostsPipeline(object):
     def process_item(self, item, spider):
-        #print item
+        # print item['url']
 
         return item
 
 
 class SQLStorePipeline(object):
     def __init__(self):
-        self.dbpool = adbapi.ConnectionPool('MySQLdb', db='spider',
-                                            user='root', passwd='', cursorclass=MySQLdb.cursors.DictCursor,
+        self.dbpool = adbapi.ConnectionPool('MySQLdb', db='cnbeta',
+                                            user='cnbeta', passwd='cnbeta',
+                                            cursorclass=MySQLdb.cursors.DictCursor,
                                             charset='utf8', use_unicode=True)
 
     def process_item(self, item, spider):
@@ -38,7 +40,7 @@ class SQLStorePipeline(object):
 
         url_hash = md5(item['url']).hexdigest()
 
-        tx.execute("select * from post where hash = %s", url_hash)
+        tx.execute("SELECT * FROM post WHERE hash = '" + url_hash + "' ")
 
         result = tx.fetchone()
         if result:
@@ -47,14 +49,18 @@ class SQLStorePipeline(object):
             tx.execute(
                 "insert into post (link, title,hash ,created,statue,introduction,content,post_time) "
                 "values (%s, %s, %s, %s,%s, %s,%s,%s)",
-                (item['url'], item['title'][0], url_hash, datetime.datetime.now(), 'done', item['introduction'][0],
+                (item['url'],
+                 item['title'][0],
+                 url_hash,
+                 datetime.datetime.now(),
+                 'done',
+                 item['introduction'][0],
                  item['content'][0],
                  datetime.datetime.strptime(item['post_time'][0], '%Y-%m-%d %H:%M:%S')
-                )
+                 )
             )
-            #2015-02-02 16:51:33
-            #log.msg("Item stored in db: %s" % item, level=log.DEBUG)
-
+            # 2015-02-02 16:51:33
+            # log.msg("Item stored in db: %s" % item, level=log.DEBUG)
 
     def handle_error(self, e):
         log.err(e)

@@ -11,11 +11,9 @@ from items import CnbetaItem
 
 
 class CnbetaSpider(CrawlSpider):
+
     def __init__(self, *a, **kw):
-
-
         super(CnbetaSpider, self).__init__(*a, **kw)
-
 
     name = "cnbeta"
     allowed_domains = ["cnbeta.com"]
@@ -25,18 +23,13 @@ class CnbetaSpider(CrawlSpider):
     )
 
     rules = (
-        Rule(SgmlLinkExtractor(allow=('.*\/list_latest_.*\.htm', )),
+        Rule(SgmlLinkExtractor(allow=('.*\/list_latest_.*\.htm',)),
              callback='parse', follow=True
-        ),
-        Rule(SgmlLinkExtractor(allow=('.*\/view_.*\.htm', )),
+             ),
+        Rule(SgmlLinkExtractor(allow=('.*\/view_.*\.htm',)),
              callback='parse_articles', follow=True
-        ),
+             ),
     )
-
-    # def start_requests(self):
-    #     return [scrapy.FormRequest("http://www.example.com/login",
-    #                            formdata={'user': 'john', 'pass': 'secret'},
-    #                            callback=self.logged_in)]
 
     def save_html(self, response):
         self.log('[start] save_html:' + response.url, level=log.DEBUG)
@@ -45,9 +38,7 @@ class CnbetaSpider(CrawlSpider):
         open(filename, 'wb').write(response.body)
         self.log('[finish] save_html:' + response.url, level=log.DEBUG)
 
-
     def parse(self, response):
-        self.save_html(response)
 
         sel = Selector(response)
 
@@ -79,16 +70,14 @@ class CnbetaSpider(CrawlSpider):
                 else:
                     self.log('url has no rule to match :' + next_url)
 
-                    #return item
-
+                    # return item
 
     def parse_articles(self, response):
-        self.save_html(response)
 
         item = CnbetaItem()
         sel = Selector(response)
 
-        #item['title'] = sel.xpath('//title/text()').extract()
+        # item['title'] = sel.xpath('//title/text()').extract()
         item['url'] = response.url
         item['title'] = sel.xpath("//h1[@class='article-tit']/text()").extract()
         item['introduction'] = sel.xpath("//div[@class='article-summ']/text()").extract()
@@ -96,11 +85,3 @@ class CnbetaSpider(CrawlSpider):
         item['post_time'] = sel.xpath("//time[@class='time']/text()").extract()
 
         return item
-
-
-    def add_cookie(self, request):
-        self.log("add_cookie now", level=log.INFO)
-        request.replace(cookies=[
-            {'name': 'COOKIE_NAME', 'value': 'VALUE', 'domain': 'DOMAIN', 'path': '/'},
-        ])
-        return request
